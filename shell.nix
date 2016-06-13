@@ -2,11 +2,10 @@
 
 let
   inherit (nixpkgs) pkgs;
-  haskellPackages = pkgs.haskell.packages.${compiler};
-  project = haskellPackages.callPackage (import ./default.nix) {};
-  drv = pkgs.stdenv.lib.overrideDerivation project (old : {
-    buildInputs = old.buildInputs
-      ++ [ (pkgs.buildHaskellEnv compiler) ];
-  });
+  hp = pkgs.haskell.packages.${compiler};
+  project = hp.callPackage (import ./default.nix) {};
+  drv = pkgs.haskell.lib.addBuildTools project (
+    [ hp.stack hp.hdevtools ]
+  );
 in
   if pkgs.lib.inNixShell then drv.env else drv
